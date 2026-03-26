@@ -1,0 +1,58 @@
+- Criar base de dados:
+
+CREATE DATABASE nome_bd;
+USE nome_bd;
+
+
+- Criar tabelas: 
+
+CREATE TABLE tabela (
+    id INT PRIMARY KEY,
+    nome VARCHAR(100)
+);
+
+
+- Chaves Primárias (PRIMARY KEY):
+
+id INT PRIMARY KEY
+
+
+- Chaves Estrangeiras (FOREIGN KEY):
+
+FOREIGN KEY (autor_id) REFERENCES autor(autor_id)
+
+
+- Inserir dados (INSERT):
+
+INSERT INTO tabela (col1, col2) VALUES (valor1, valor2);
+
+
+- Ver Dados (SELECT):
+
+SELECT * FROM tabela;
+
+
+- Filtrar Dados (WHERE): 
+
+SELECT * FROM livro WHERE ano = 2018;
+
+
+- Funções (AVG, MIN, MAX):
+
+SELECT AVG(quota) FROM livro;
+SELECT MIN(quota) FROM livro;
+SELECT MAX(quota) FROM livro;
+
+
+- JOIN:
+
+SELECT livro.titulo, autor.nome
+FROM livro
+JOIN autor ON livro.autor_id = autor.autor_id;
+
+
+-Atualizar Dados (UPDATE):
+
+UPDATE editora
+SET nome = 'Porto Editora'
+WHERE editora_id = 3;
