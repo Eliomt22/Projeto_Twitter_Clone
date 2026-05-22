@@ -1,6 +1,5 @@
-// src/context/AuthContext.js — Estado global de autenticação
 import { createContext, useContext, useState, useEffect } from 'react';
-import { login as apiLogin, registar as apiRegistar } from '../services/api';
+import { login as apiLogin, registar as apiRegistar, logout as apiLogout } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +8,6 @@ export function AuthProvider({ children }) {
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    // Restaurar sessão ao carregar a app
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('utilizador');
     if (token && userData) {
@@ -34,7 +32,8 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try { await apiLogout(); } catch (_) {}
     localStorage.removeItem('token');
     localStorage.removeItem('utilizador');
     setUtilizador(null);

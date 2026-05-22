@@ -1,13 +1,11 @@
-// routes/admin.js — Backoffice do Administrador
+// rotas de administração
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
-// Todas as rotas admin requerem autenticação E ser admin
 router.use(authMiddleware, adminMiddleware);
 
-// GET /api/admin/utilizadores — Listar todos os utilizadores
 router.get('/utilizadores', async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -25,7 +23,6 @@ router.get('/utilizadores', async (req, res) => {
   }
 });
 
-// PUT /api/admin/utilizadores/:id — Editar utilizador
 router.put('/utilizadores/:id', async (req, res) => {
   const { id } = req.params;
   const { bio, is_admin, ativo } = req.body;
@@ -42,7 +39,6 @@ router.put('/utilizadores/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/admin/utilizadores/:id — Apagar utilizador
 router.delete('/utilizadores/:id', async (req, res) => {
   const { id } = req.params;
   try {
@@ -54,7 +50,6 @@ router.delete('/utilizadores/:id', async (req, res) => {
   }
 });
 
-// GET /api/admin/tweets — Listar todos os tweets
 router.get('/tweets', async (req, res) => {
   try {
     const [rows] = await db.query(`
@@ -74,7 +69,6 @@ router.get('/tweets', async (req, res) => {
   }
 });
 
-// PUT /api/admin/tweets/:id — Editar tweet (admin)
 router.put('/tweets/:id', async (req, res) => {
   const { id } = req.params;
   const { conteudo, imagem_url } = req.body;
@@ -107,7 +101,6 @@ router.put('/tweets/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/admin/tweets/:id — Apagar tweet (admin)
 router.delete('/tweets/:id', async (req, res) => {
   const { id } = req.params;
   try {

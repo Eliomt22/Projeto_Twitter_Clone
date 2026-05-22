@@ -1,10 +1,9 @@
-// routes/utilizadores.js — Perfis e seguimentos
+// rotas de utilizadores: perfil, tweets e seguimentos
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { authMiddleware } = require('../middleware/auth');
 
-// GET /api/utilizadores/sugestoes — Utilizadores que ainda não segues
 router.get('/sugestoes/lista', authMiddleware, async (req, res) => {
   const { utilizador_id } = req.utilizador;
   try {
@@ -26,7 +25,6 @@ router.get('/sugestoes/lista', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/utilizadores/:username — Perfil público
 router.get('/:username', authMiddleware, async (req, res) => {
   const { username } = req.params;
   const { utilizador_id: eu_id } = req.utilizador;
@@ -50,7 +48,46 @@ router.get('/:username', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /api/utilizadores/:username/tweets — Tweets de um utilizador
+router.get('/:username/seguindo', authMiddleware, async (req, res) => {
+  const { username } = req.params;
+  const { utilizador_id: eu_id } = req.utilizador;
+  try {
+    const [rows] = await db.query(`
+      SELECT u.utilizador_id, u.username, u.foto_perfil, u.bio,
+             (SELECT COUNT(*) FROM SEGUIDOR WHERE seguidor_id = ? AND seguido_id = u.utilizador_id) AS eu_sigo
+      FROM SEGUIDOR s
+      INNER JOIN UTILIZADOR u ON u.utilizador_id = s.seguido_id
+      INNER JOIN UTILIZADOR dono ON dono.username = ? AND dono.utilizador_id = s.seguidor_id
+      WHERE u.ativo = 1
+      ORDER BY u.username ASC
+    `, [eu_id, username]);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao carregar seguindo.' });
+  }
+});
+
+router.get('/:username/seguidores', authMiddleware, async (req, res) => {
+  const { username } = req.params;
+  const { utilizador_id: eu_id } = req.utilizador;
+  try {
+    const [rows] = await db.query(`
+      SELECT u.utilizador_id, u.username, u.foto_perfil, u.bio,
+             (SELECT COUNT(*) FROM SEGUIDOR WHERE seguidor_id = ? AND seguido_id = u.utilizador_id) AS eu_sigo
+      FROM SEGUIDOR s
+      INNER JOIN UTILIZADOR u ON u.utilizador_id = s.seguidor_id
+      INNER JOIN UTILIZADOR dono ON dono.username = ? AND dono.utilizador_id = s.seguido_id
+      WHERE u.ativo = 1
+      ORDER BY u.username ASC
+    `, [eu_id, username]);
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao carregar seguidores.' });
+  }
+});
+
 router.get('/:username/tweets', authMiddleware, async (req, res) => {
   const { username } = req.params;
   const { utilizador_id: eu_id } = req.utilizador;
@@ -76,7 +113,6 @@ router.get('/:username/tweets', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/utilizadores/:id/seguir — Seguir/deixar de seguir
 router.post('/:id/seguir', authMiddleware, async (req, res) => {
   const { utilizador_id: seguidor_id } = req.utilizador;
   const seguido_id = parseInt(req.params.id);
@@ -104,7 +140,6 @@ router.post('/:id/seguir', authMiddleware, async (req, res) => {
   }
 });
 
-// PUT /api/utilizadores/perfil — Atualizar o meu perfil
 router.put('/perfil/editar', authMiddleware, async (req, res) => {
   const { utilizador_id } = req.utilizador;
   const { bio, foto_perfil } = req.body;

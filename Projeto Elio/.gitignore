@@ -1,0 +1,24 @@
+# dependências
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+
+# variáveis de ambiente (credenciais)
+.env
+backend/.env
+backend/.env.*
+
+# imagens carregadas pelos utilizadores
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# build do React
+frontend/build/
+
+# ficheiros do sistema
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*

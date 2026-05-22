@@ -1,8 +1,7 @@
-// src/pages/Feed.js — Feed principal e página de explorar
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getFeed, getExplore, publicarTweet } from '../services/api';
+import { getFeed, getExplore, publicarTweet, uploadImagem } from '../services/api';
 import TweetCard from '../components/TweetCard';
 import { IconImage } from '../components/Icons';
 
@@ -14,10 +13,11 @@ export default function Feed({ tipo }) {
   const [tweets, setTweets] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [conteudo, setConteudo] = useState('');
-  const [imagem_url, setImagemUrl] = useState('');
+  const [ficheiroImagem, setFicheiroImagem] = useState(null);
+  const [previewImagem, setPreviewImagem] = useState('');
   const [publicando, setPublicando] = useState(false);
-  const [mostrarImagem, setMostrarImagem] = useState(false);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     carregarTweets();
@@ -35,19 +35,37 @@ export default function Feed({ tipo }) {
     }
   };
 
+  const handleSelecionarFicheiro = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFicheiroImagem(file);
+    setPreviewImagem(URL.createObjectURL(file));
+  };
+
+  const removerImagem = () => {
+    setFicheiroImagem(null);
+    setPreviewImagem('');
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handlePublicar = async (e) => {
     e.preventDefault();
     if (!conteudo.trim()) return;
     setPublicando(true);
     try {
-      const { data: novoTweet } = await publicarTweet({
-        conteudo: conteudo.trim(),
-        imagem_url: imagem_url.trim() || undefined
-      });
+      let imagem_url = undefined;
+
+      if (ficheiroImagem) {
+        const formData = new FormData();
+        formData.append('imagem', ficheiroImagem);
+        const { data: uploadData } = await uploadImagem(formData);
+        imagem_url = uploadData.imagem_url;
+      }
+
+      const { data: novoTweet } = await publicarTweet({ conteudo: conteudo.trim(), imagem_url });
       setTweets(prev => [novoTweet, ...prev]);
       setConteudo('');
-      setImagemUrl('');
-      setMostrarImagem(false);
+      removerImagem();
     } catch (err) {
       alert(err.response?.data?.error || 'Erro ao publicar tweet.');
     } finally {
@@ -101,32 +119,40 @@ export default function Feed({ tipo }) {
               rows={3}
               maxLength={280}
             />
-            {mostrarImagem && (
-              <div className="form-group" style={{ marginTop: 8 }}>
-                <input
-                  type="url"
-                  placeholder="URL da imagem (https://...)"
-                  value={imagem_url}
-                  onChange={e => setImagemUrl(e.target.value)}
-                  style={{
-                    width: '100%',
-                    background: 'var(--bg-secondary)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 8,
-                    padding: '8px 12px',
-                    color: 'var(--text-primary)',
-                    fontFamily: 'var(--font)',
-                    fontSize: 14
-                  }}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleSelecionarFicheiro}
+            />
+            {previewImagem && (
+              <div style={{ position: 'relative', marginTop: 8, display: 'inline-block' }}>
+                <img
+                  src={previewImagem}
+                  alt="preview"
+                  style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8, display: 'block' }}
                 />
+                <button
+                  onClick={removerImagem}
+                  style={{
+                    position: 'absolute', top: 4, right: 4,
+                    background: 'rgba(0,0,0,0.6)', border: 'none',
+                    borderRadius: '50%', color: '#fff',
+                    width: 24, height: 24, cursor: 'pointer', fontSize: 14,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }}
+                  title="Remover imagem"
+                >×</button>
               </div>
             )}
             <div className="tweet-actions">
               <div style={{ display: 'flex', gap: 8 }}>
                 <button
                   className="tweet-action-btn"
-                  onClick={() => setMostrarImagem(!mostrarImagem)}
+                  onClick={() => fileInputRef.current?.click()}
                   title="Adicionar imagem"
+                  type="button"
                 >
                   <IconImage size={20} />
                 </button>

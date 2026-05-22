@@ -1,4 +1,4 @@
-// db.js — Ligação à base de dados MySQL
+// pool de ligações MySQL (raw queries)
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -14,7 +14,7 @@ const pool = mysql.createPool({
   timezone: '+00:00'
 });
 
-// Testar ligação ao arrancar
+// testa a ligação ao iniciar
 pool.getConnection()
   .then(conn => {
     console.log('✅ Ligado à base de dados MySQL com sucesso!');
