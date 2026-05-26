@@ -108,7 +108,11 @@ export default function Feed({ tipo }) {
       {/* ── Caixa de novo tweet (só no feed) ── */}
       {tipo === 'feed' && (
         <div className="new-tweet-box">
-          <div className="avatar">{inicial}</div>
+          <div className="avatar">
+            {utilizador?.foto_perfil
+              ? <img src={utilizador.foto_perfil} alt={utilizador.username} />
+              : inicial}
+          </div>
           <div className="tweet-input-area">
             <textarea
               ref={textareaRef}

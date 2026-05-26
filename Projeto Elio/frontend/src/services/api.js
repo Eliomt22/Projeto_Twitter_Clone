@@ -21,6 +21,7 @@ export const getFeed           = (page = 1) => api.get(`/tweets/feed?page=${page
 export const getExplore        = (page = 1, q = '') => api.get(`/tweets/explore?page=${page}${q ? `&q=${encodeURIComponent(q)}` : ''}`);
 export const uploadImagem      = (formData) => api.post('/tweets/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
 export const publicarTweet     = (dados)    => api.post('/tweets', dados);
+export const editarTweet       = (id, dados) => api.put(`/tweets/${id}`, dados);
 export const apagarTweet       = (id)       => api.delete(`/tweets/${id}`);
 export const toggleGosto       = (id)       => api.post(`/tweets/${id}/gosto`);
 

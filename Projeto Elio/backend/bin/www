@@ -6,17 +6,13 @@ const { sequelize } = require('../models');
 
 const PORT = process.env.PORT || 5000;
 
+// arrancar servidor independentemente do estado do Sequelize
+app.listen(PORT, () => {
+  console.log(`Servidor em http://localhost:${PORT}`);
+  console.log(`Swagger: http://localhost:${PORT}/api-docs`);
+});
+
+// sincronizar modelos em background (não bloqueia o arranque)
 sequelize.sync({ force: false })
-  .then(() => {
-    console.log('Sequelize: tabelas sincronizadas');
-    app.listen(PORT, () => {
-      console.log(`Servidor em http://localhost:${PORT}`);
-      console.log(`Swagger: http://localhost:${PORT}/api-docs`);
-    });
-  })
-  .catch(err => {
-    console.error('Erro Sequelize:', err.message);
-    app.listen(PORT, () => {
-      console.log(`Servidor em http://localhost:${PORT}`);
-    });
-  });
+  .then(() => console.log('Sequelize: modelos sincronizados'))
+  .catch(err => console.warn('Sequelize sync (aviso):', err.message));

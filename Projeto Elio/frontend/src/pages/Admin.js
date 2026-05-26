@@ -11,6 +11,15 @@ export default function Admin() {
   const [tweets, setTweets] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
+  // confirmações de apagar
+  const [confirmarApagarUser, setConfirmarApagarUser] = useState(null);
+  const [confirmarApagarTweet, setConfirmarApagarTweet] = useState(null);
+
+  // edição de tweet inline
+  const [editandoTweet, setEditandoTweet] = useState(null);
+  const [editConteudo, setEditConteudo] = useState('');
+  const [guardando, setGuardando] = useState(false);
+
   useEffect(() => { carregarDados(); }, [tab]);
 
   const carregarDados = async () => {
@@ -36,36 +45,43 @@ export default function Admin() {
       setUtilizadores(prev => prev.map(x =>
         x.utilizador_id === u.utilizador_id ? { ...x, ativo: !x.ativo } : x
       ));
-    } catch (err) { alert('Erro ao atualizar.'); }
+    } catch (err) { console.error(err); }
   };
 
-  const apagarUtilizador = async (id) => {
-    if (!window.confirm('Apagar utilizador e todos os seus dados?')) return;
+  const handleApagarUtilizador = async (id) => {
     try {
       await adminApagarUtilizador(id);
       setUtilizadores(prev => prev.filter(u => u.utilizador_id !== id));
-    } catch (err) { alert('Erro ao apagar.'); }
+      setConfirmarApagarUser(null);
+    } catch (err) { console.error(err); }
   };
 
-  const editarTweet = async (tweet) => {
-    const novoConteudo = window.prompt('Editar conteúdo do tweet:', tweet.conteudo);
-    if (novoConteudo === null) return;
-    const novaImagem = window.prompt('URL da imagem (vazio para remover):', tweet.imagem_url || '');
+  const iniciarEdicaoTweet = (tweet) => {
+    setEditandoTweet(tweet);
+    setEditConteudo(tweet.conteudo);
+    setConfirmarApagarTweet(null);
+  };
+
+  const handleGuardarTweet = async () => {
+    if (!editConteudo.trim()) return;
+    setGuardando(true);
     try {
-      const { data } = await adminEditarTweet(tweet.tweet_id, {
-        conteudo: novoConteudo,
-        imagem_url: novaImagem.trim() || null
+      const { data } = await adminEditarTweet(editandoTweet.tweet_id, {
+        conteudo: editConteudo.trim(),
+        imagem_url: editandoTweet.imagem_url || null
       });
       setTweets(prev => prev.map(t => t.tweet_id === data.tweet_id ? data : t));
-    } catch (err) { alert(err.response?.data?.error || 'Erro ao editar.'); }
+      setEditandoTweet(null);
+    } catch (err) { console.error(err); }
+    finally { setGuardando(false); }
   };
 
-  const apagarTweet = async (id) => {
-    if (!window.confirm('Apagar este tweet?')) return;
+  const handleApagarTweet = async (id) => {
     try {
       await adminApagarTweet(id);
       setTweets(prev => prev.filter(t => t.tweet_id !== id));
-    } catch (err) { alert('Erro ao apagar.'); }
+      setConfirmarApagarTweet(null);
+    } catch (err) { console.error(err); }
   };
 
   const totalAtivos = utilizadores.filter(u => u.ativo).length;
@@ -80,7 +96,6 @@ export default function Admin() {
         <h2>Backoffice</h2>
       </div>
 
-      {/* ── Estatísticas ── */}
       <div className="admin-stats">
         <div className="stat-card">
           <span className="stat-value">{utilizadores.length}</span>
@@ -104,13 +119,12 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
       <div className="tabs">
         <button className={`tab-btn ${tab === 'utilizadores' ? 'active' : ''}`} onClick={() => setTab('utilizadores')}>
-          <IconUsers size={16} style={{ marginRight: 6 }} /> Utilizadores
+          <IconUsers size={16} /> Utilizadores
         </button>
         <button className={`tab-btn ${tab === 'tweets' ? 'active' : ''}`} onClick={() => setTab('tweets')}>
-          <IconTweet size={16} style={{ marginRight: 6 }} /> Tweets
+          <IconTweet size={16} /> Tweets
         </button>
       </div>
 
@@ -118,6 +132,8 @@ export default function Admin() {
         {carregando ? (
           <div className="spinner" />
         ) : tab === 'utilizadores' ? (
+
+          /* ── Tabela utilizadores ── */
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -154,24 +170,38 @@ export default function Admin() {
                     </td>
                     <td className="admin-center">{u.total_tweets}</td>
                     <td>
-                      <div className="admin-actions">
-                        <button
-                          className={`admin-btn ${u.ativo ? 'admin-btn-warn' : 'admin-btn-ok'}`}
-                          onClick={() => toggleAtivo(u)}
-                        >
-                          {u.ativo ? 'Desativar' : 'Ativar'}
-                        </button>
-                        <button className="admin-btn admin-btn-danger" onClick={() => apagarUtilizador(u.utilizador_id)}>
-                          <IconDelete size={14} />
-                        </button>
-                      </div>
+                      {confirmarApagarUser === u.utilizador_id ? (
+                        <div className="admin-confirm">
+                          <span>Apagar?</span>
+                          <button className="admin-btn admin-btn-ok" onClick={() => setConfirmarApagarUser(null)}>Não</button>
+                          <button className="admin-btn admin-btn-danger" onClick={() => handleApagarUtilizador(u.utilizador_id)}>Sim</button>
+                        </div>
+                      ) : (
+                        <div className="admin-actions">
+                          <button
+                            className={`admin-btn ${u.ativo ? 'admin-btn-warn' : 'admin-btn-ok'}`}
+                            onClick={() => toggleAtivo(u)}
+                          >
+                            {u.ativo ? 'Desativar' : 'Ativar'}
+                          </button>
+                          <button
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => setConfirmarApagarUser(u.utilizador_id)}
+                          >
+                            <IconDelete size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
         ) : (
+
+          /* ── Tabela tweets ── */
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -194,7 +224,37 @@ export default function Admin() {
                         <strong>@{t.username}</strong>
                       </div>
                     </td>
-                    <td className="admin-tweet-text">{t.conteudo}</td>
+                    <td className="admin-tweet-text">
+                      {editandoTweet?.tweet_id === t.tweet_id ? (
+                        <div className="admin-edit-inline">
+                          <textarea
+                            className="admin-edit-textarea"
+                            value={editConteudo}
+                            onChange={e => setEditConteudo(e.target.value)}
+                            maxLength={280}
+                            rows={2}
+                            autoFocus
+                          />
+                          <div className="admin-edit-btns">
+                            <button
+                              className="admin-btn"
+                              onClick={() => setEditandoTweet(null)}
+                            >
+                              Cancelar
+                            </button>
+                            <button
+                              className="admin-btn admin-btn-ok"
+                              onClick={handleGuardarTweet}
+                              disabled={guardando || !editConteudo.trim()}
+                            >
+                              {guardando ? '...' : 'Guardar'}
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        t.conteudo
+                      )}
+                    </td>
                     <td className="admin-center">
                       <span className="admin-gostos">
                         <IconHeart size={13} filled /> {t.total_gostos}
@@ -204,14 +264,28 @@ export default function Admin() {
                       {new Date(t.data_publicacao).toLocaleDateString('pt-PT')}
                     </td>
                     <td>
-                      <div className="admin-actions">
-                        <button className="admin-btn admin-btn-edit" onClick={() => editarTweet(t)}>
-                          <IconEdit size={14} />
-                        </button>
-                        <button className="admin-btn admin-btn-danger" onClick={() => apagarTweet(t.tweet_id)}>
-                          <IconDelete size={14} />
-                        </button>
-                      </div>
+                      {confirmarApagarTweet === t.tweet_id ? (
+                        <div className="admin-confirm">
+                          <span>Apagar?</span>
+                          <button className="admin-btn admin-btn-ok" onClick={() => setConfirmarApagarTweet(null)}>Não</button>
+                          <button className="admin-btn admin-btn-danger" onClick={() => handleApagarTweet(t.tweet_id)}>Sim</button>
+                        </div>
+                      ) : (
+                        <div className="admin-actions">
+                          <button
+                            className="admin-btn admin-btn-edit"
+                            onClick={() => iniciarEdicaoTweet(t)}
+                          >
+                            <IconEdit size={14} />
+                          </button>
+                          <button
+                            className="admin-btn admin-btn-danger"
+                            onClick={() => { setConfirmarApagarTweet(t.tweet_id); setEditandoTweet(null); }}
+                          >
+                            <IconDelete size={14} />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

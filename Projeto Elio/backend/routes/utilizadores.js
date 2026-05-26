@@ -97,7 +97,8 @@ router.get('/:username/tweets', authMiddleware, async (req, res) => {
       SELECT t.tweet_id, t.conteudo, t.imagem_url, t.data_publicacao,
              u.utilizador_id, u.username, u.foto_perfil,
              COUNT(DISTINCT g.utilizador_id) AS total_gostos,
-             MAX(CASE WHEN g.utilizador_id = ? THEN 1 ELSE 0 END) AS eu_gostei
+             MAX(CASE WHEN g.utilizador_id = ? THEN 1 ELSE 0 END) AS eu_gostei,
+             (SELECT COUNT(*) FROM COMENTARIO c WHERE c.tweet_id = t.tweet_id) AS total_comentarios
       FROM TWEET t
       INNER JOIN UTILIZADOR u ON t.utilizador_id = u.utilizador_id
       LEFT JOIN GOSTO g ON g.tweet_id = t.tweet_id

@@ -131,6 +131,48 @@ router.post('/', authMiddleware, upload.single('imagem'), async (req, res) => {
 });
 
 // #swagger.tags = ['Tweets']
+// #swagger.summary = 'Editar tweet (autor ou admin)'
+router.put('/:id', authMiddleware, async (req, res) => {
+  const { utilizador_id, is_admin } = req.utilizador;
+  const tweet_id = req.params.id;
+  const { conteudo, imagem_url } = req.body;
+
+  if (!conteudo || conteudo.trim().length === 0)
+    return res.status(400).json({ error: 'O conteúdo não pode estar vazio.' });
+  if (conteudo.length > 280)
+    return res.status(400).json({ error: 'O tweet não pode ter mais de 280 caracteres.' });
+
+  try {
+    const [rows] = await db.query('SELECT utilizador_id FROM TWEET WHERE tweet_id = ?', [tweet_id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Tweet não encontrado.' });
+    if (!is_admin && rows[0].utilizador_id !== utilizador_id)
+      return res.status(403).json({ error: 'Sem permissão para editar este tweet.' });
+
+    await db.query(
+      'UPDATE TWEET SET conteudo = ?, imagem_url = ? WHERE tweet_id = ?',
+      [conteudo.trim(), imagem_url || null, tweet_id]
+    );
+
+    const [updated] = await db.query(`
+      SELECT t.tweet_id, t.conteudo, t.imagem_url, t.data_publicacao,
+             u.utilizador_id, u.username, u.foto_perfil,
+             COUNT(DISTINCT g.utilizador_id) AS total_gostos,
+             0 AS eu_gostei, 0 AS total_comentarios
+      FROM TWEET t
+      INNER JOIN UTILIZADOR u ON t.utilizador_id = u.utilizador_id
+      LEFT JOIN GOSTO g ON g.tweet_id = t.tweet_id
+      WHERE t.tweet_id = ?
+      GROUP BY t.tweet_id
+    `, [tweet_id]);
+
+    res.json(updated[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Erro ao editar tweet.' });
+  }
+});
+
+// #swagger.tags = ['Tweets']
 // #swagger.summary = 'Apagar tweet (autor ou admin)'
 router.delete('/:id', authMiddleware, async (req, res) => {
   const { utilizador_id, is_admin } = req.utilizador;

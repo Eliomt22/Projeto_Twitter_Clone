@@ -1,18 +1,32 @@
 // CRUD de comentários
-const { Comentario, Utilizador, Tweet } = require('../models');
+const db = require('../db');
 
 const listar = async (req, res) => {
   const tweet_id = req.params.id;
   try {
-    const comentarios = await Comentario.findAll({
-      where: { tweet_id },
-      include: [{
-        model: Utilizador,
-        attributes: ['utilizador_id', 'username', 'foto_perfil']
-      }],
-      order: [['data_criacao', 'DESC']]
-    });
-    return res.json(comentarios);
+    const [rows] = await db.query(`
+      SELECT c.comentario_id, c.conteudo, c.data_criacao, c.utilizador_id,
+             u.username, u.foto_perfil
+      FROM COMENTARIO c
+      INNER JOIN UTILIZADOR u ON u.utilizador_id = c.utilizador_id
+      WHERE c.tweet_id = ?
+      ORDER BY c.data_criacao DESC
+    `, [tweet_id]);
+
+    // formatar para o frontend esperar { Utilizador: { username, foto_perfil } }
+    const resultado = rows.map(c => ({
+      comentario_id: c.comentario_id,
+      conteudo:      c.conteudo,
+      data_criacao:  c.data_criacao,
+      utilizador_id: c.utilizador_id,
+      Utilizador: {
+        utilizador_id: c.utilizador_id,
+        username:      c.username,
+        foto_perfil:   c.foto_perfil
+      }
+    }));
+
+    return res.json(resultado);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erro ao carregar comentários.' });
@@ -30,21 +44,34 @@ const criar = async (req, res) => {
     return res.status(400).json({ error: 'Comentário não pode ter mais de 280 caracteres.' });
 
   try {
-    const tweet = await Tweet.findByPk(tweet_id);
-    if (!tweet) return res.status(404).json({ error: 'Tweet não encontrado.' });
+    const [tweet] = await db.query('SELECT tweet_id FROM TWEET WHERE tweet_id = ?', [tweet_id]);
+    if (tweet.length === 0) return res.status(404).json({ error: 'Tweet não encontrado.' });
 
-    const comentario = await Comentario.create({
-      conteudo: conteudo.trim(),
-      tweet_id,
-      utilizador_id
+    const [result] = await db.query(
+      'INSERT INTO COMENTARIO (conteudo, tweet_id, utilizador_id) VALUES (?, ?, ?)',
+      [conteudo.trim(), tweet_id, utilizador_id]
+    );
+
+    const [rows] = await db.query(`
+      SELECT c.comentario_id, c.conteudo, c.data_criacao, c.utilizador_id,
+             u.username, u.foto_perfil
+      FROM COMENTARIO c
+      INNER JOIN UTILIZADOR u ON u.utilizador_id = c.utilizador_id
+      WHERE c.comentario_id = ?
+    `, [result.insertId]);
+
+    const c = rows[0];
+    return res.status(201).json({
+      comentario_id: c.comentario_id,
+      conteudo:      c.conteudo,
+      data_criacao:  c.data_criacao,
+      utilizador_id: c.utilizador_id,
+      Utilizador: {
+        utilizador_id: c.utilizador_id,
+        username:      c.username,
+        foto_perfil:   c.foto_perfil
+      }
     });
-
-    // retorna com dados do utilizador
-    const resultado = await Comentario.findByPk(comentario.comentario_id, {
-      include: [{ model: Utilizador, attributes: ['utilizador_id', 'username', 'foto_perfil'] }]
-    });
-
-    return res.status(201).json(resultado);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erro ao criar comentário.' });
@@ -56,13 +83,17 @@ const apagar = async (req, res) => {
   const { cid } = req.params;
 
   try {
-    const comentario = await Comentario.findByPk(cid);
-    if (!comentario) return res.status(404).json({ error: 'Comentário não encontrado.' });
+    const [rows] = await db.query(
+      'SELECT utilizador_id FROM COMENTARIO WHERE comentario_id = ?',
+      [cid]
+    );
+    if (rows.length === 0)
+      return res.status(404).json({ error: 'Comentário não encontrado.' });
 
-    if (!is_admin && comentario.utilizador_id !== utilizador_id)
+    if (!is_admin && rows[0].utilizador_id !== utilizador_id)
       return res.status(403).json({ error: 'Sem permissão para apagar este comentário.' });
 
-    await comentario.destroy();
+    await db.query('DELETE FROM COMENTARIO WHERE comentario_id = ?', [cid]);
     return res.json({ message: 'Comentário apagado com sucesso.' });
   } catch (err) {
     console.error(err);
