@@ -124,7 +124,8 @@ export default function Perfil() {
         const formData = new FormData();
         formData.append('imagem', fotoFicheiro);
         const { data: uploadData } = await uploadImagem(formData);
-        foto_perfil = `http://localhost:5000${uploadData.imagem_url}`;
+        const baseUrl = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+        foto_perfil = `${baseUrl}${uploadData.imagem_url}`;
       }
 
       await editarPerfil({ bio: editBio || null, foto_perfil });
