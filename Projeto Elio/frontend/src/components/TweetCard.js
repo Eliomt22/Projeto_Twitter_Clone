@@ -4,6 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { toggleGosto, apagarTweet, editarTweet, adminEditarTweet, uploadImagem, getComentarios, criarComentario, apagarComentario } from '../services/api';
 import { IconHeart, IconEdit, IconDelete, IconComment, IconImage } from './Icons';
 
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
+const getImgUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${API_BASE}${url}`;
+};
+
 function formatarData(dataStr) {
   const data = new Date(dataStr);
   const agora = new Date();
@@ -261,7 +268,7 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
 
         {tweet.imagem_url && !editando && (
           <img
-            src={tweet.imagem_url}
+            src={getImgUrl(tweet.imagem_url)}
             alt="Imagem do tweet"
             className="tweet-img"
             onClick={e => e.stopPropagation()}

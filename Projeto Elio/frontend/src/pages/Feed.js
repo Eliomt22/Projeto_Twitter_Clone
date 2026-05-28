@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getFeed, getExplore, publicarTweet, uploadImagem } from '../services/api';
 import TweetCard from '../components/TweetCard';
+
+const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:5000/api').replace('/api', '');
 import { IconImage } from '../components/Icons';
 
 export default function Feed({ tipo }) {
@@ -59,7 +61,8 @@ export default function Feed({ tipo }) {
         const formData = new FormData();
         formData.append('imagem', ficheiroImagem);
         const { data: uploadData } = await uploadImagem(formData);
-        imagem_url = uploadData.imagem_url;
+        const raw = uploadData.imagem_url;
+        imagem_url = raw.startsWith('http') ? raw : `${API_BASE}${raw}`;
       }
 
       const { data: novoTweet } = await publicarTweet({ conteudo: conteudo.trim(), imagem_url });
