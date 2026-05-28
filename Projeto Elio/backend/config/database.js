@@ -1,4 +1,3 @@
-// ligação Sequelize à base de dados
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 

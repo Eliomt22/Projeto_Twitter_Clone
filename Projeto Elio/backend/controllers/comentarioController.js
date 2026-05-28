@@ -1,4 +1,3 @@
-// CRUD de comentários
 const db = require('../db');
 
 const listar = async (req, res) => {

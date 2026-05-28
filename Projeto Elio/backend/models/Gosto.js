@@ -1,4 +1,3 @@
-// tabela GOSTO (junção Utilizador ↔ Tweet)
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

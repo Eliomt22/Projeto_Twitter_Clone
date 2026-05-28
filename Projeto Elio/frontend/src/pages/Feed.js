@@ -108,7 +108,6 @@ export default function Feed({ tipo }) {
         </button>
       </div>
 
-      {/* ── Caixa de novo tweet (só no feed) ── */}
       {tipo === 'feed' && (
         <div className="new-tweet-box">
           <div className="avatar">
@@ -182,7 +181,6 @@ export default function Feed({ tipo }) {
         </div>
       )}
 
-      {/* ── Lista de tweets ── */}
       {carregando ? (
         <div className="spinner" />
       ) : tweets.length === 0 ? (

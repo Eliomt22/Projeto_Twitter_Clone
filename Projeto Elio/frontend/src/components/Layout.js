@@ -16,7 +16,6 @@ export default function Layout() {
 
   return (
     <div className="layout">
-      {/* ── Sidebar esquerda ── */}
       <aside className="sidebar">
         <div className="sidebar-logo">𝕏</div>
 
@@ -72,12 +71,10 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* ── Conteúdo principal ── */}
       <main className="main-content">
         <Outlet />
       </main>
 
-      {/* ── Painel direito ── */}
       <RightPanel />
     </div>
   );

@@ -65,7 +65,6 @@ export default function Perfil() {
   const [listaModal, setListaModal] = useState([]);
   const [carregandoModal, setCarregandoModal] = useState(false);
 
-  // editar perfil
   const [editando, setEditando] = useState(false);
   const [editBio, setEditBio] = useState('');
   const [editFoto, setEditFoto] = useState('');
@@ -195,7 +194,6 @@ export default function Perfil() {
 
       <div className="profile-header">
         <div className="profile-top">
-          {/* foto de perfil com opção de trocar se for o meu perfil */}
           <div style={{ position: 'relative', display: 'inline-block' }}>
             <div className="avatar lg">
               {(editando ? fotoPreview : perfil.foto_perfil)
@@ -228,7 +226,6 @@ export default function Perfil() {
             )}
           </div>
 
-          {/* botão editar / seguir */}
           {eSouEu ? (
             !editando && (
               <button className="btn-outline" onClick={abrirEdicao} style={{ padding: '8px 20px' }}>
@@ -247,7 +244,6 @@ export default function Perfil() {
         </div>
 
         {editando ? (
-          /* formulário de edição */
           <div className="profile-edit-form">
             {fotoPreview && (
               <button

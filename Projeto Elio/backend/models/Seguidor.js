@@ -1,4 +1,3 @@
-// tabela SEGUIDOR (junção Utilizador ↔ Utilizador)
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

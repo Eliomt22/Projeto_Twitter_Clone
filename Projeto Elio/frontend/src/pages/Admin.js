@@ -11,11 +11,9 @@ export default function Admin() {
   const [tweets, setTweets] = useState([]);
   const [carregando, setCarregando] = useState(true);
 
-  // confirmações de apagar
   const [confirmarApagarUser, setConfirmarApagarUser] = useState(null);
   const [confirmarApagarTweet, setConfirmarApagarTweet] = useState(null);
 
-  // edição de tweet inline
   const [editandoTweet, setEditandoTweet] = useState(null);
   const [editConteudo, setEditConteudo] = useState('');
   const [guardando, setGuardando] = useState(false);
@@ -133,7 +131,6 @@ export default function Admin() {
           <div className="spinner" />
         ) : tab === 'utilizadores' ? (
 
-          /* ── Tabela utilizadores ── */
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
@@ -201,7 +198,6 @@ export default function Admin() {
 
         ) : (
 
-          /* ── Tabela tweets ── */
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>

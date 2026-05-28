@@ -1,4 +1,3 @@
-// registo, login e logout
 const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
 const { Utilizador, Sessao } = require('../models');
@@ -30,7 +29,6 @@ const register = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // guardar sessão
     await Sessao.upsert({
       utilizador_id: novoUser.utilizador_id,
       token,
@@ -75,7 +73,6 @@ const login = async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    // atualizar sessão
     await Sessao.upsert({
       utilizador_id: utilizador.utilizador_id,
       token,

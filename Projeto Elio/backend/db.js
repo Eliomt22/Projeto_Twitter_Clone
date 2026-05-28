@@ -1,4 +1,3 @@
-// pool de ligações MySQL (raw queries)
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -17,7 +16,6 @@ const pool = mysql.createPool({
   ...(isProduction && { ssl: { rejectUnauthorized: false } })
 });
 
-// testa a ligação ao iniciar
 pool.getConnection()
   .then(conn => {
     console.log('✅ Ligado à base de dados MySQL com sucesso!');

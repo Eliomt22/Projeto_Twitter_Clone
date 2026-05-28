@@ -3,12 +3,10 @@ import { Link } from 'react-router-dom';
 export default function Landing() {
   return (
     <div className="landing">
-      {/* Coluna esquerda — logo grande */}
       <div className="landing-left">
         <span className="landing-logo-big">𝕏</span>
       </div>
 
-      {/* Coluna direita — conteúdo */}
       <div className="landing-right">
         <span className="landing-logo-mobile">𝕏</span>
 

@@ -28,11 +28,9 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
   const [gostos, setGostos] = useState(Number(tweet.total_gostos) || 0);
   const [euGostei, setEuGostei] = useState(Boolean(tweet.eu_gostei));
 
-  // apagar tweet
   const [confirmarApagar, setConfirmarApagar] = useState(false);
   const [apagando, setApagando] = useState(false);
 
-  // editar tweet
   const [editando, setEditando] = useState(false);
   const [editConteudo, setEditConteudo] = useState(tweet.conteudo);
   const [editImagem, setEditImagem] = useState(tweet.imagem_url || null);
@@ -41,7 +39,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
   const [guardando, setGuardando] = useState(false);
   const editFileRef = useRef(null);
 
-  // comentários
   const [mostrarComentarios, setMostrarComentarios] = useState(false);
   const [comentarios, setComentarios] = useState([]);
   const [totalComentarios, setTotalComentarios] = useState(Number(tweet.total_comentarios) || 0);
@@ -181,7 +178,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
           <span className="tweet-time">· {formatarData(tweet.data_publicacao)}</span>
         </div>
 
-        {/* modo edição */}
         {editando ? (
           <div className="tweet-edit-box" onClick={e => e.stopPropagation()}>
             <textarea
@@ -193,7 +189,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
               autoFocus
             />
 
-            {/* imagem atual / preview */}
             {editPreview && (
               <div style={{ position: 'relative', marginTop: 8, display: 'inline-block' }}>
                 <img
@@ -275,7 +270,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
           />
         )}
 
-        {/* confirmação apagar tweet */}
         {confirmarApagar && (
           <div className="tweet-confirm-box" onClick={e => e.stopPropagation()}>
             <span>Apagar este tweet?</span>
@@ -339,7 +333,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
           )}
         </div>
 
-        {/* secção de comentários */}
         {mostrarComentarios && (
           <div className="comentarios-section" onClick={e => e.stopPropagation()}>
             <form className="comentario-form" onSubmit={handleEnviarComentario}>
@@ -392,7 +385,6 @@ export default function TweetCard({ tweet, onApagado, onAtualizar }) {
                     </span>
                     <p style={{ margin: '2px 0 0', fontSize: 14 }}>{c.conteudo}</p>
 
-                    {/* confirmação apagar comentário */}
                     {confirmarApagarCom === c.comentario_id && (
                       <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
                         <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Apagar?</span>

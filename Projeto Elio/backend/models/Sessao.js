@@ -1,4 +1,3 @@
-// tabela SESSAO (one-to-one com UTILIZADOR)
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 

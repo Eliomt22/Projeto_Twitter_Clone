@@ -31,7 +31,6 @@ export default function RightPanel() {
 
   return (
     <aside className="right-panel">
-      {/* Barra de pesquisa */}
       <form className="search-bar" onSubmit={handlePesquisa}>
         <span className="search-icon"><IconExplore size={16} /></span>
         <input
@@ -42,7 +41,6 @@ export default function RightPanel() {
         />
       </form>
 
-      {/* Sugestões para seguir */}
       {sugestoes.length > 0 && (
         <div className="rp-card">
           <h3 className="rp-title">Quem seguir</h3>
@@ -70,7 +68,6 @@ export default function RightPanel() {
         </div>
       )}
 
-      {/* Rodapé */}
       <div className="rp-footer">
         © 2026 Twitter Clone · SGBD I
       </div>
